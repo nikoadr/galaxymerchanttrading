@@ -1,11 +1,10 @@
 # Simple Camel Application for Testing
 
 ## Requires
-Java 11
-Postgresql 10
-Linux(Ubuntu latest)
+### Postgresql 10
+### Linux(Ubuntu latest)
 
-##Import database table
+## Import database table
 Source /resource/database
 
 ## Build
@@ -14,7 +13,7 @@ mvn clean package
 ## Run on Linux
 java -jar 'target/handling-transaction-0.0.1-SNAPSHOT.jar
 
-##Check on Browser
+## Check on Browser
 Url : http://localhost:8080/dashboard
 
 ## Stop
