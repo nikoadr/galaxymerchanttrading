@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Handling Form Submission</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+</head>
+<body>
+<h3>Please use code list below and select comodity for transaction</h3>
+<table>
+    <thead>
+    <tr>
+        <th> Code </th>
+        <th> Value </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${listOption.empty}">
+        <td colspan="2"> No Transaction Code Available </td>
+    </tr>
+    <tr th:each="data : ${listOption}">
+        <td><span th:text="${data.numName}"> Code </span></td>
+        <td><span th:text="${data.numValue}"> Value </span></td>
+    </tr>
+    </tbody>
+</table>
+<p>ex: glob prok Gold</p>
+<h5><i ><p style="color:red">Note : Each Code Should be separated by space</p></i></h5>
+<h1>Purchase Details</h1>
+<form action="#" th:action="@{/dashboard}" th:object="${data}" method="post">
+
+    <p>Code: <input type="text" th:field="*{code}"/> Comodity:
+            <select class="form-control" th:field="*{comodityId}">
+                <option th:each="data:${comodity}"
+                            th:value="${data.id}"
+                        th:text="${data.comodityName}">
+                </option>
+            </select>
+    </p>
+    <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
+    <div class="form-group">
+        <div id="textBox"></div>
+    </div>
+</form>
+</body>
+</html>
