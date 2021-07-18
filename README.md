@@ -1,11 +1,12 @@
-# Simple Camel Application for Testing
+#Galaxy Merchan App
 
 ## Requires
-### Postgresql 10
-### Linux(Ubuntu latest)
+Postgresql 10
+
+Linux(Ubuntu latest)
 
 ## Import database table
-Source /resource/database
+Source : /resource/database
 
 ## Build
 mvn clean package
