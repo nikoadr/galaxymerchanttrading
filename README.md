@@ -1,21 +1,21 @@
 # Simple Camel Application for Testing
 
-Note: we're using java 11
+## Requires
+Java 11
+Postgresql 10
+Linux(Ubuntu latest)
+
+##Import database table
+Source /resource/database
 
 ## Build
-mvnw clean package dependency:copy-dependencies
-
-## Build Docker Image
-docker build -t imaniprima/simple-camel:0.0.1 .
-
-## Run on Docker
-docker run -it --rm --name simple-camel -e TZ=Asia/Jakarta imaniprima/simple-camel:0.0.1 
-
-## Run on Windows
-java -cp target/simple-camel-0.0.1-SNAPSHOT.jar;target/dependency/* id.co.imaniprima.test.SimpleCamel
+mvn clean package
 
 ## Run on Linux
-java -cp 'target/simple-camel-0.0.1-SNAPSHOT.jar:target/dependency/*' id.co.imaniprima.test.SimpleCamel
+java -jar 'target/handling-transaction-0.0.1-SNAPSHOT.jar
+
+##Check on Browser
+Url : http://localhost:8080/dashboard
 
 ## Stop
 ctrl+c on running console
