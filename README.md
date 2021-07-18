@@ -1,4 +1,4 @@
-#Galaxy Merchan App
+# Galaxy Merchant App
 
 ## Requires
 Postgresql 10
