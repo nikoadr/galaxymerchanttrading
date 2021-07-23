@@ -6,7 +6,8 @@
 </head>
 <body>
 <h1>Result</h1>
-<p th:text=" ${result.resultTransaction}+ ' ' + ${result.resultName}+ ' is '+${result.resultSum}+ ' Credits '" />
+<!--<p th:text=" ${result.resultTransaction}+ ' ' + ${result.resultName}+ ' is '+${result.resultSum}+ ' Credits '" />-->
+<p th:text=" ${result.resultTransaction}" />
 <a href="/dashboard">Submit another purchase</a>
 </body>
 </html>

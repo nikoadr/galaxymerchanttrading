@@ -9,9 +9,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RomanNumericConfig {
-    private Integer id;
-    private String numCode;
-    private Integer numValue;
-
+public class IntergalacticUnitConfig {
+    private String interGalacticUnitName;
+    private String romanNumeral;
 }

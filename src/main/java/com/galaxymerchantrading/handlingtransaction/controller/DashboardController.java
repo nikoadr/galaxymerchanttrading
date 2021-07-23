@@ -1,10 +1,7 @@
 package com.galaxymerchantrading.handlingtransaction.controller;
 
 import com.galaxymerchantrading.handlingtransaction.dao.DashoboardService;
-import com.galaxymerchantrading.handlingtransaction.domain.Comodity;
-import com.galaxymerchantrading.handlingtransaction.domain.Result;
-import com.galaxymerchantrading.handlingtransaction.domain.RomanNumericConfig;
-import com.galaxymerchantrading.handlingtransaction.domain.Transaction;
+import com.galaxymerchantrading.handlingtransaction.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,49 +23,127 @@ public class DashboardController {
         List<RomanNumericConfig> data = dashoboardService.get();
         List<Comodity> comodities = dashoboardService.getComodity();
 
-        model.addAttribute("data", new Transaction());
+        model.addAttribute("data", new RequestBody());
         model.addAttribute("listOption",data);
         model.addAttribute("comodity",comodities);
         return "dashboard";
     }
 
     @PostMapping("/dashboard")
-    public String processLoad(@ModelAttribute Transaction transaction, Model model) {
+    public String processLoad(@ModelAttribute RequestBody request, Model model) {
         Result result                   = new Result();
-        List<RomanNumericConfig> data   = dashoboardService.get();
-        List<Comodity> comodities       = dashoboardService.getComodity();
-        ArrayList<String> numCode       = new ArrayList<>();
-        Double comodityValue            = null;
-        String comodityName             = "";
-        Integer arabicFormat            = null;
-        String[] arrCode = transaction.getCode().split(" ");
-        for(int i=0;i<arrCode.length; i++){
-            for(RomanNumericConfig val:data){
-                if(val.getNumName().equals(arrCode[i])){
-                    numCode.add(val.getNumCode());
+        Boolean isStatement = false;
+        Boolean isQuestion = false;
+       String lastChar = checkInput(request.getInput());
+       if(lastChar.equals("?")){
+           isQuestion = true;
+       }else{
+           processInputStatement(request.getInput());
+       }
+
+//        for(int i=0;i<arrCode.length; i++){
+//            for(RomanNumericConfig val:data){
+//                if(val.getNumName().equals(arrCode[i])){
+//                    numCode.add(val.getNumCode());
+//                }
+//            }
+//        }
+
+//        for(Comodity com:comodities){
+//            if(com.getId().equals(transaction.getComodityId())){
+//                comodityValue   = com.getComodityValue();
+//                comodityName    = com.getComodityName();
+//            }
+//        }
+//        if(numCode.size() == arrCode.length){
+//            arabicFormat = this.convertRomanToInteger(numCode);
+//        }
+//        if(arabicFormat != null){
+            result.setResultTransaction(request.getInput());
+//            result.setResultName(comodityName);
+//            result.setResultSum((long) (arabicFormat * comodityValue));
+            model.addAttribute("result", result);
+            return "result";
+//        }else{
+//            return "error";
+//        }
+
+    }
+
+    public String checkInput(String input){
+        char lastChar = input.charAt(input.length()-1);
+        return String.valueOf(lastChar);
+    }
+
+//    public void processInputQuestion(String){
+//
+//    }
+
+    public void processInputStatement(String input){
+        input = input.replaceAll("\\s+"," ").trim();
+        String[] arrInput = input.split(" ");
+        if(arrInput.length == 3){
+            if(arrInput[1].equalsIgnoreCase("is")){
+                if(dashoboardService.checkDataExist("roman_numeric_config","num_code",arrInput[2].trim())){
+                    IntergalacticUnitConfig unitConfig = new IntergalacticUnitConfig();
+                    unitConfig.setInterGalacticUnitName(arrInput[0].trim());
+                    unitConfig.setRomanNumeral(arrInput[2].trim());
+                    dashoboardService.deleteIntergalacticUnitByName(unitConfig.getInterGalacticUnitName().toLowerCase());
+                    dashoboardService.deleteIntergalacticUnitByRomanNumeral(unitConfig.getRomanNumeral());
+                    dashoboardService.updateIntergalacticUnits(unitConfig);
+                }
+            }
+
+        }else if(arrInput.length > 3){
+            System.err.println("length array "+ arrInput.length);
+            int index1 = -1;
+            String identify1 = "is";
+            for (int i=0;i<arrInput.length;i++) {
+                if (arrInput[i].equals(identify1)) {
+                    index1 = i;
+                    break;
+                }
+            }
+            Integer valueA = null;
+            try {
+                valueA = Integer.parseInt(arrInput[index1+1]);
+            }catch (NumberFormatException ex){
+                ex.printStackTrace();
+            }
+            String identify2 = arrInput[index1-1];
+            if(!dashoboardService.checkDataExist("intergalactic_unit_config","intergalactic_unit_name",identify2)){
+                ArrayList<String> arrRomanNumeral       = new ArrayList<>();
+                Integer arabicValue = null;
+               for(int i=0; i<index1-1; i++){
+                   arrRomanNumeral.add(arrInput[i]);
+               }
+               if(arrRomanNumeral.size() == assembleRomanNumeral(arrRomanNumeral).size()){
+                   arabicValue = this.convertRomanToInteger(assembleRomanNumeral(arrRomanNumeral));
+                  if(arabicValue != null){
+                      double valuePerUnit = valueA/arabicValue;
+                      Comodity comodity = new Comodity();
+                      comodity.setComodityName(identify2);
+                      comodity.setComodityValue(valuePerUnit);
+                      dashoboardService.deleteComodityByName(identify2);
+                      dashoboardService.updateComodity(comodity);
+                  }
+               }
+//               System.err.println("roman numeral "+numCode);
+            }
+        }
+    }
+
+    public ArrayList<String> assembleRomanNumeral(ArrayList<String> romanNumeral){
+        List<IntergalacticUnitConfig> getUnit   = dashoboardService.getIntergalacticUnit();
+        ArrayList<String> assembleStr = new ArrayList<>();
+        for(int i=0;i<romanNumeral.size(); i++){
+            for(IntergalacticUnitConfig val:getUnit){
+                if(val.getInterGalacticUnitName().equals(romanNumeral.get(i))){
+                    assembleStr.add(val.getRomanNumeral());
                 }
             }
         }
-
-        for(Comodity com:comodities){
-            if(com.getId().equals(transaction.getComodityId())){
-                comodityValue   = com.getComodityValue();
-                comodityName    = com.getComodityName();
-            }
-        }
-        if(numCode.size() == arrCode.length){
-            arabicFormat = this.convertRomanToInteger(numCode);
-        }
-        if(arabicFormat != null){
-            result.setResultTransaction(transaction.getCode());
-            result.setResultName(comodityName);
-            result.setResultSum((long) (arabicFormat * comodityValue));
-            model.addAttribute("result", result);
-            return "result";
-        }else{
-            return "error";
-        }
-
+        return assembleStr;
     }
 
     public Integer convertRomanToInteger(ArrayList<String> romanStr){
@@ -277,7 +352,7 @@ public class DashboardController {
                             result += 10;
                         }
                     }else{
-                        result++;
+                        result += 10;
                     }
                 }else if(next_char == 'M'){
                     return null;
