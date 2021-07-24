@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +82,6 @@ public class DashboardController {
 
         if(dashoboardService.checkDataExist("comodity","comodity_name",arrLst.get(arrLst.size()-1))){
             Comodity comodity =  dashoboardService.findComodityByName(arrLst.get(arrLst.size()-1));
-            System.err.println("comodity name "+comodity.getComodityName());
             comodityValue = comodity.getComodityValue();
             arrLst.remove(arrLst.size()-1);
             ArrayList<String> arrRomanNumeral       = new ArrayList<>();
@@ -95,7 +95,8 @@ public class DashboardController {
                 arabicValue = this.convertRomanToInteger(assembleRomanNumeral(arrRomanNumeral));
                 if(arabicValue != null){
                     Double totalValue = arabicValue * comodityValue;
-                    return resultStr+comodity.getComodityName()+" is "+totalValue+" Credits";
+                    BigDecimal bigTotalValue = new BigDecimal(totalValue);
+                    return resultStr+comodity.getComodityName()+" is "+bigTotalValue+" Credits";
                 }else{
                     return "Invalid input format";
                 }
@@ -164,7 +165,7 @@ public class DashboardController {
                if(arrRomanNumeral.size() == assembleRomanNumeral(arrRomanNumeral).size()){
                    arabicValue = this.convertRomanToInteger(assembleRomanNumeral(arrRomanNumeral));
                   if(arabicValue != null){
-                      double valuePerUnit = valueGross/arabicValue;
+                      double valuePerUnit = (double) valueGross/arabicValue;
                       Comodity comodity = new Comodity();
                       comodity.setComodityName(identify2);
                       comodity.setComodityValue(valuePerUnit);
