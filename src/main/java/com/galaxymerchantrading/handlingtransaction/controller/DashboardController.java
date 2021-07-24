@@ -20,11 +20,11 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String load(Model model) {
-        List<RomanNumericConfig> data = dashoboardService.get();
+        List<IntergalacticUnitConfig> units = dashoboardService.getIntergalacticUnit();
         List<Comodity> comodities = dashoboardService.getComodity();
 
         model.addAttribute("data", new RequestBody());
-        model.addAttribute("listOption",data);
+        model.addAttribute("units",units);
         model.addAttribute("comodity",comodities);
         return "dashboard";
     }
@@ -32,54 +32,100 @@ public class DashboardController {
     @PostMapping("/dashboard")
     public String processLoad(@ModelAttribute RequestBody request, Model model) {
         Result result                   = new Result();
-        Boolean isStatement = false;
-        Boolean isQuestion = false;
-       String lastChar = checkInput(request.getInput());
-       if(lastChar.equals("?")){
-           isQuestion = true;
-       }else{
-           processInputStatement(request.getInput());
-       }
-
-//        for(int i=0;i<arrCode.length; i++){
-//            for(RomanNumericConfig val:data){
-//                if(val.getNumName().equals(arrCode[i])){
-//                    numCode.add(val.getNumCode());
-//                }
-//            }
-//        }
-
-//        for(Comodity com:comodities){
-//            if(com.getId().equals(transaction.getComodityId())){
-//                comodityValue   = com.getComodityValue();
-//                comodityName    = com.getComodityName();
-//            }
-//        }
-//        if(numCode.size() == arrCode.length){
-//            arabicFormat = this.convertRomanToInteger(numCode);
-//        }
-//        if(arabicFormat != null){
-            result.setResultTransaction(request.getInput());
-//            result.setResultName(comodityName);
-//            result.setResultSum((long) (arabicFormat * comodityValue));
-            model.addAttribute("result", result);
-            return "result";
-//        }else{
-//            return "error";
-//        }
+        String resp = "";
+        String firstStr = checkFirstString(request.getInput());
+        String lastStr = checkLastString(request.getInput());
+        if(lastStr.equals("?") || firstStr.toLowerCase().equals("how")){
+           resp = processInputQuestion(request.getInput());
+        }else{
+           resp = processInputStatement(request.getInput());
+        }
+        result.setResultTransaction(resp);
+        model.addAttribute("result", result);
+        return "result";
 
     }
 
-    public String checkInput(String input){
+    public String checkLastString(String input){
         char lastChar = input.charAt(input.length()-1);
         return String.valueOf(lastChar);
     }
+    public String checkFirstString(String input){
+        input = input.replaceAll("\\s+"," ").trim();
+        String[] arrInput = input.split(" ");
+        return arrInput[0];
+    }
 
-//    public void processInputQuestion(String){
-//
-//    }
+    public String processInputQuestion(String input){
+        List<String> arrLst = new ArrayList<>();
+        Double comodityValue  = null;
+        String newStr = input.toLowerCase().replace("how","")
+                        .replace("many","")
+                        .replace("much","")
+                        .replace("credits","")
+                        .replace("credit","")
+                        .replaceAll("\\?","");
+        newStr = newStr.replaceAll("\\s+"," ").trim();
+        String[] newStrArr = newStr.split(" ");
+        for (int i=0;i<newStrArr.length;i++) {
+            arrLst.add(newStrArr[i]);
+            if (newStrArr[i].equals("is")) {
+                if(i == newStrArr.length){
+                    arrLst.remove(i-1);
+                }else{
+                    arrLst.remove(i);
+                }
 
-    public void processInputStatement(String input){
+            }
+        }
+
+        if(dashoboardService.checkDataExist("comodity","comodity_name",arrLst.get(arrLst.size()-1))){
+            Comodity comodity =  dashoboardService.findComodityByName(arrLst.get(arrLst.size()-1));
+            System.err.println("comodity name "+comodity.getComodityName());
+            comodityValue = comodity.getComodityValue();
+            arrLst.remove(arrLst.size()-1);
+            ArrayList<String> arrRomanNumeral       = new ArrayList<>();
+            String resultStr = "";
+            Integer arabicValue = null;
+            for(int i=0; i<arrLst.size(); i++){
+                arrRomanNumeral.add(arrLst.get(i));
+                resultStr += arrLst.get(i) +" ";
+            }
+            if(assembleRomanNumeral(arrRomanNumeral).size() == arrLst.size()){
+                arabicValue = this.convertRomanToInteger(assembleRomanNumeral(arrRomanNumeral));
+                if(arabicValue != null){
+                    Double totalValue = arabicValue * comodityValue;
+                    return resultStr+comodity.getComodityName()+" is "+totalValue+" Credits";
+                }else{
+                    return "Invalid input format";
+                }
+            }else{
+                return "I have no idea what you are talking about";
+            }
+        }else{
+            ArrayList<String> arrRomanNumeral       = new ArrayList<>();
+            String resultStr = "";
+            Integer arabicValue = null;
+            for(int i=0; i<arrLst.size(); i++){
+                arrRomanNumeral.add(arrLst.get(i));
+                resultStr += arrLst.get(i) +" ";
+            }
+            if(assembleRomanNumeral(arrRomanNumeral).size() == arrLst.size()){
+                arabicValue = this.convertRomanToInteger(assembleRomanNumeral(arrRomanNumeral));
+                if(arabicValue != null){
+                    return resultStr+" is "+arabicValue;
+                }else{
+                    return "Invalid input format";
+                }
+            }else{
+                return "I have no idea what you are talking about";
+            }
+        }
+
+
+    }
+
+    public String processInputStatement(String input){
         input = input.replaceAll("\\s+"," ").trim();
         String[] arrInput = input.split(" ");
         if(arrInput.length == 3){
@@ -95,32 +141,30 @@ public class DashboardController {
             }
 
         }else if(arrInput.length > 3){
-            System.err.println("length array "+ arrInput.length);
-            int index1 = -1;
-            String identify1 = "is";
+            Integer valueGross = null;
+            int index = -1;
             for (int i=0;i<arrInput.length;i++) {
-                if (arrInput[i].equals(identify1)) {
-                    index1 = i;
+                if (arrInput[i].toLowerCase().equals("is")) {
+                    index = i;
                     break;
                 }
             }
-            Integer valueA = null;
             try {
-                valueA = Integer.parseInt(arrInput[index1+1]);
+                valueGross = Integer.parseInt(arrInput[index+1]);
             }catch (NumberFormatException ex){
                 ex.printStackTrace();
             }
-            String identify2 = arrInput[index1-1];
+            String identify2 = arrInput[index-1];
             if(!dashoboardService.checkDataExist("intergalactic_unit_config","intergalactic_unit_name",identify2)){
                 ArrayList<String> arrRomanNumeral       = new ArrayList<>();
                 Integer arabicValue = null;
-               for(int i=0; i<index1-1; i++){
+               for(int i=0; i<index-1; i++){
                    arrRomanNumeral.add(arrInput[i]);
                }
                if(arrRomanNumeral.size() == assembleRomanNumeral(arrRomanNumeral).size()){
                    arabicValue = this.convertRomanToInteger(assembleRomanNumeral(arrRomanNumeral));
                   if(arabicValue != null){
-                      double valuePerUnit = valueA/arabicValue;
+                      double valuePerUnit = valueGross/arabicValue;
                       Comodity comodity = new Comodity();
                       comodity.setComodityName(identify2);
                       comodity.setComodityValue(valuePerUnit);
@@ -128,9 +172,9 @@ public class DashboardController {
                       dashoboardService.updateComodity(comodity);
                   }
                }
-//               System.err.println("roman numeral "+numCode);
             }
         }
+        return input;
     }
 
     public ArrayList<String> assembleRomanNumeral(ArrayList<String> romanNumeral){
@@ -145,6 +189,8 @@ public class DashboardController {
         }
         return assembleStr;
     }
+
+
 
     public Integer convertRomanToInteger(ArrayList<String> romanStr){
         String romanNumeral = "";

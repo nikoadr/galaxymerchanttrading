@@ -10,7 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Comodity {
-    private Integer id;
     private String comodityName;
     private Double comodityValue;
 

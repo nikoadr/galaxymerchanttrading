@@ -10,7 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RomanNumericConfig {
-    private Integer id;
     private String numCode;
     private Integer numValue;
 

@@ -10,7 +10,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Result {
-    private Long resultSum;
-    private String resultName;
     private String resultTransaction;
 }

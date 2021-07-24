@@ -6,7 +6,7 @@ import com.galaxymerchantrading.handlingtransaction.domain.RomanNumericConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Repository
 @Slf4j
@@ -39,7 +38,6 @@ public class DashoboardService {
                 @Override
                 public RomanNumericConfig mapRow(ResultSet resultSet, int i) throws SQLException {
                     RomanNumericConfig romanNumericConfig = new RomanNumericConfig();
-                    romanNumericConfig.setId(resultSet.getInt("id"));
                     romanNumericConfig.setNumCode(resultSet.getString("num_code"));
                     romanNumericConfig.setNumValue(resultSet.getInt("num_value"));
                     return romanNumericConfig;
@@ -115,9 +113,28 @@ public class DashoboardService {
         }
     }
 
+
+        public Comodity findComodityByName(String comodityName){
+            String sql = "select * from comodity where LOWER(comodity_name)='"+comodityName.toLowerCase()+"'";
+            try {
+                Comodity comodity = jdbcTemplate.queryForObject(sql, new RowMapper<Comodity>() {
+                    @Override
+                    public Comodity mapRow(ResultSet resultSet, int i) throws SQLException {
+                        Comodity comodity1 = new Comodity();
+                        comodity1.setComodityName(resultSet.getString("comodity_name"));
+                        comodity1.setComodityValue(resultSet.getDouble("comodity_value"));
+                        return comodity1;
+                    }
+                });
+                return comodity;
+            }catch (EmptyResultDataAccessException ex){
+                return new Comodity();
+            }
+        }
+
     public Boolean checkDataExist(String tableName,String columnName, String params){
         String sql = "select count(*) from ";
-        String where = " where "+columnName+"='"+params+"'";
+        String where = " where LOWER("+columnName+")='"+params.toLowerCase()+"'";
         String finalSql = sql+tableName+where;
         try {
             Integer result = jdbcTemplate.queryForObject(finalSql, Integer.class);
@@ -127,19 +144,6 @@ public class DashoboardService {
         }
     }
 
-//    public Boolean checkIntergalacticUnitExist(String params1,String params2){
-//        String sql = "select count(*) from intergalactic_unit_config where intergalactic_unit_name='"+params1+"' and ";
-//        String where = " where "+columnName+"='"+params+"'";
-//        String finalSql = sql+tableName+where;
-//        try {
-//            Integer result = jdbcTemplate.queryForObject(finalSql, Integer.class);
-//            return  result>0;
-//        }catch (EmptyResultDataAccessException ex){
-//            throw ex;
-//        }
-//    }
-
-
 
     public List<Comodity> getComodity(){
         String sql = "select * from comodity";
@@ -148,7 +152,6 @@ public class DashoboardService {
                 @Override
                 public Comodity mapRow(ResultSet resultSet, int i) throws SQLException {
                     Comodity comodity = new Comodity();
-                    comodity.setId(resultSet.getInt("id"));
                     comodity.setComodityName(resultSet.getString("comodity_name"));
                     comodity.setComodityValue(resultSet.getDouble("comodity_value"));
 
