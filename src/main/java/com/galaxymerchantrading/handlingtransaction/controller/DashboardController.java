@@ -132,12 +132,17 @@ public class DashboardController {
         if(arrInput.length == 3){
             if(arrInput[1].equalsIgnoreCase("is")){
                 if(dashoboardService.checkDataExist("roman_numeric_config","num_code",arrInput[2].trim())){
-                    IntergalacticUnitConfig unitConfig = new IntergalacticUnitConfig();
-                    unitConfig.setInterGalacticUnitName(arrInput[0].trim());
-                    unitConfig.setRomanNumeral(arrInput[2].trim());
-                    dashoboardService.deleteIntergalacticUnitByName(unitConfig.getInterGalacticUnitName().toLowerCase());
-                    dashoboardService.deleteIntergalacticUnitByRomanNumeral(unitConfig.getRomanNumeral());
-                    dashoboardService.updateIntergalacticUnits(unitConfig);
+                    if(arrInput[0].trim().equalsIgnoreCase("is") || arrInput[0].trim().equalsIgnoreCase("how")||arrInput[0].trim().equalsIgnoreCase("many")||arrInput[0].trim().equalsIgnoreCase("much")||arrInput[0].trim().equalsIgnoreCase("credits")||arrInput[0].trim().equalsIgnoreCase("credit")){
+                        return input;
+                    }else{
+                        IntergalacticUnitConfig unitConfig = new IntergalacticUnitConfig();
+                        unitConfig.setInterGalacticUnitName(arrInput[0].trim());
+                        unitConfig.setRomanNumeral(arrInput[2].trim());
+                        dashoboardService.deleteIntergalacticUnitByName(unitConfig.getInterGalacticUnitName().toLowerCase());
+                        dashoboardService.deleteIntergalacticUnitByRomanNumeral(unitConfig.getRomanNumeral());
+                        dashoboardService.updateIntergalacticUnits(unitConfig);
+                    }
+
                 }
             }
 
