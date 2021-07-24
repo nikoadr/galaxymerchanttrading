@@ -6,7 +6,8 @@ Postgresql 10
 Linux(Ubuntu latest)
 
 ## Import database table
-Source : /resource/database
+Source : /resource/database.sql
+setting your own database config on application properties
 
 ## Build
 mvn clean package
